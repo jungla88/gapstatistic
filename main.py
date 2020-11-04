@@ -60,7 +60,7 @@ maxValCols = np.max(X, axis = 0, keepdims = True)
 evaluation2 = gapstatistic.GapStatistic(X,
                                         method,
                                         distanceFunction="sqeuclidean",
-                                        n_refs = 100,
+                                        n_refs = 10,
                                         kMax=20)
 
 
