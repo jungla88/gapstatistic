@@ -53,9 +53,20 @@ class GapStatistic:
         #setup PCA
         #...
         
+        self._logWdata=None
+        self._ExpectedlogW_nrefs=None
+        
     @property
     def referenceSets(self):
         return self._referenceSets
+    
+    @property
+    def logWdata(self):
+        return self._logWdata
+    
+    @property
+    def E_logWrefs(self):
+        return self._ExpectedlogW_nrefs
     
     @property
     def kMax(self):
@@ -84,8 +95,8 @@ class GapStatistic:
     def evaluateGap(self):
         
         #Data init
-        W_ref = np.zeros((self._n_refs,self._kMax))
-        W_data = np.zeros((1,self._kMax))       
+        logW_ref = np.zeros((self._n_refs,self._kMax))
+        logW_data = np.zeros((1,self._kMax))       
         self._referenceSets = [np.zeros((self.__numObservations,self.__numFeatures)) for _ in range(self._n_refs)]
         #Reference loops
         for i in range(self._n_refs):
@@ -96,10 +107,10 @@ class GapStatistic:
                 clusters = [self._referenceSets[i][labels==l] for l in range(k+1)]
                 clusters_sumofdist = [sum(pdist(cluster,metric = self.distanceFunction)/len(cluster)) 
                                       for cluster in clusters]                
-                W_ref[i][k] = np.log(sum(clusters_sumofdist))                
+                logW_ref[i][k] = np.log(sum(clusters_sumofdist))                
          
         
-        self.ExpectedW_nrefs = np.mean(W_ref, axis = 0, keepdims = True)
+        self._ExpectedlogW_nrefs = np.mean(logW_ref, axis = 0, keepdims = True)
         
         #Data loop
         for k in range(self._kMax):
@@ -112,12 +123,11 @@ class GapStatistic:
                 sumofdist = [sum(pdist(cluster,metric = self.distanceFunction)/(len(cluster)))
                              for cluster in clusters]
             
-            W_data[0][k] = np.log(sum(sumofdist))
+            logW_data[0][k] = np.log(sum(sumofdist))
 
-        self.W_data = W_data
+        self._logWdata = logW_data
         
-        gap_k = self.ExpectedW_nrefs - self.W_data
-        
+        gap_k = self._ExpectedlogW_nrefs - self._logWdata
         
         return gap_k
                 
